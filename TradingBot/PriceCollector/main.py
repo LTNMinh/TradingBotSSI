@@ -28,7 +28,7 @@ def get_trading_future_symbol_data():
 
     resp = ssi_fc_data.securities_details(config, "DER", current_symbol, 1, 10)
     if resp["status"] == "DataNotReady":
-        print(resp)
+        logger.error(resp)
         return None
 
     derivatives_detail = ssi_fc_data.securities_details(
