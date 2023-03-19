@@ -14,7 +14,7 @@ CREATE TABLE stocks_real_time (
     trading_session TEXT NULL,
     trading_status TEXT NULL,
     change DOUBLE PRECISION NULL,
-    ratio_change DOUBLE PRECISION NULL,
+    ratio_change DOUBLE PRECISION NULL
 );
 
 SELECT create_hypertable('stocks_real_time','time');
