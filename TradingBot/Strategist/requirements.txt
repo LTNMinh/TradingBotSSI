@@ -1,0 +1,4 @@
+loguru==0.6.0
+pyzmq==25.0.0
+numpy
+requests

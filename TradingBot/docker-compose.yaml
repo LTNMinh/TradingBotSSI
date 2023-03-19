@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  price_pub:
+    build: ./PriceCollector/
+    env_file:
+      - .env
+    depends_on:
+      - timescaledb
+    volumes:
+      - ./log:/log
+    restart: on-failure:3
+
+  strategist:
+    build: ./Strategist/
+    depends_on:
+      - price_pub
+    env_file:
+      - .env
+    volumes:
+      - ./log:/log
+
+  timescaledb:
+    image: timescale/timescaledb-ha:pg14-latest
+    platform: linux/amd64
+    ports:
+      - "5432:5432"
+    volumes:
+      # - ./Database/postgres/data:/home/postgres/pgdata/data
+      - ./Database/postgres/datatest:/home/postgres/pgdata/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
