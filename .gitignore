@@ -165,6 +165,7 @@ cython_debug/
 
 Database/
 trading_bot_utils/trading_bot_utils/strategies/*
+trading_bot_utils/trading_bot_utils/tests/strategies/*
 
 dev.env
 
