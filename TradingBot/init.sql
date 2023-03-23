@@ -18,3 +18,16 @@ CREATE TABLE stocks_real_time (
 );
 
 SELECT create_hypertable('stocks_real_time','time');
+
+CREATE MATERIALIZED VIEW stock_candlestick_one_min
+WITH (timescaledb.continuous) AS
+SELECT time_bucket('1 minutes', time) AS one_min,
+	symbol,
+    first(last_price,time) as open,
+    max(last_price) as high,
+    min(last_price) as low,
+    last(last_price,time) as close,
+    sum(last_vol) as total_vol 
+from public.stocks_real_time
+where trading_session = 'LO'
+GROUP BY one_min, symbol ;
