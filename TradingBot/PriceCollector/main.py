@@ -21,19 +21,24 @@ def get_trading_future_symbol_data():
     def _filter_vn30(x):
         return x["Symbol"].startswith("VN30")
 
-    data = ssi_fc_data.securities(config, "DER", 1, 100)["data"]
+    resp = ssi_fc_data.securities(config, "DER", 1, 100)
+    logger.error(resp)
+    if resp["status"] in ["DataNotReady","NoDataFound"]:
+        logger.error(resp)
+        return None
+    
+    data = resp["data"]
     mylist = list(filter(_filter_vn30, data))
     mylist.sort(key=lambda x: x["Symbol"])
     current_symbol = mylist[0]["Symbol"]
 
     resp = ssi_fc_data.securities_details(config, "DER", current_symbol, 1, 10)
-    if resp["status"] == "DataNotReady":
+    if resp["status"] in ["DataNotReady","NoDataFound"]:
         logger.error(resp)
         return None
+    
+    derivatives_detail = resp["data"]
 
-    derivatives_detail = ssi_fc_data.securities_details(
-        config, "DER", current_symbol, 1, 10
-    )["data"]
     maturities_date = derivatives_detail[0]["RepeatedInfo"][0]["MaturityDate"]
     maturities_date = datetime.datetime.strptime(maturities_date, FORMAT)
     today = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
@@ -106,12 +111,16 @@ if __name__ == "__main__":
     if not DEBUG:
         config.access_jwt = ssi_fc_data.access_token(config)["data"]["accessToken"]
         symbol = get_trading_future_symbol_data()
-        selected_channel = f"X-TRADE:{symbol}"
-        logger.info(f"Start to Stream Channel {selected_channel}")
+        if symbol:
+            selected_channel = f"X-TRADE:{symbol}"
+            logger.info(f"Start to Stream Channel {selected_channel}")
 
-        ssi_fc_data.Market_Data_Stream(
-            config, get_market_data, getError, selected_channel
-        )
+            ssi_fc_data.Market_Data_Stream(
+                config, get_market_data, getError, selected_channel
+            )
+        else: 
+            logger.error(f"Cannot select Future Data")
+
     else:
         with open("TRADELOG.log", "r") as f:
             while True:
